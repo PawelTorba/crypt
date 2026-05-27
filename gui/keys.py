@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from algorithms.rsa_signature import generate_keys
 
 class KeysFrame(tk.Frame):
     def __init__(self, parent):
@@ -62,5 +63,22 @@ class KeysFrame(tk.Frame):
             self.file_label_public_key.config(text=f"Plik klucza publicznego: {self.output_public_key_file}")
 
     def generate_keys(self):
-        #key generation logic will go here
-        pass
+
+        try:
+
+            if not self.output_private_key_file or not self.output_public_key_file:
+                self.busy_status_label.config(text="Wybierz pliki wyjściowe")
+                return
+
+            key_size = int(self.selected_key_size.get())
+
+            generate_keys(
+                self.output_private_key_file,
+                self.output_public_key_file,
+                key_size
+            )
+
+            self.busy_status_label.config(text="Klucze wygenerowane")
+
+        except Exception as e:
+            self.busy_status_label.config(text=f"Błąd: {e}")
