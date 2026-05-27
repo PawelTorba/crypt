@@ -288,18 +288,18 @@ class AES:
 # PRZYKŁAD
 # =========================
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     aes = AES("1234567890abcdef")
+    aes = AES("1234567890abcdef")
 
-#     tekst = "To jest tajna wiadomość AES qasd 1w4 e12wedasd asd"
+    tekst = "To jest tajna wiadomość AES qasd 1w4 e12wedasd asd"
 
-#     encrypted = aes.encrypt(tekst)
+    encrypted = aes.encrypt(tekst)
 
-#     print("ENCRYPTED:")
-#     print(encrypted.hex())
+    print("ENCRYPTED:")
+    print(encrypted.hex())
 
-#     decrypted = aes.decrypt(encrypted)
+    decrypted = aes.decrypt(encrypted)
 
-#     print("\nDECRYPTED:")
-#     print(decrypted)
+    print("\nDECRYPTED:")
+    print(decrypted)
