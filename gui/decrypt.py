@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import messagebox
+from algorithms.crypto_lib import decrypt_dispatcher
 
 class DecryptFrame(tk.Frame):
     def __init__(self, parent):
@@ -45,7 +47,7 @@ class DecryptFrame(tk.Frame):
         self.aes_mode_dropdown_frame.grid(row=0, column=0, columnspan=3, sticky="w")
         self.label_aes_options = tk.Label(self.aes_mode_dropdown_frame, text="Tryb AES:")
         self.label_aes_options.grid(row=0, column=0, padx=10, pady=10, sticky="w")  
-        self.aes_modes = ["AES-256-CBC", "AES-256-CFB", "AES-256-OFB", "AES-256-CTR"]
+        self.aes_modes = ["AES-256-GCM"]
         self.selected_aes_mode = tk.StringVar(value=self.aes_modes[0])
         self.aes_mode_dropdown = ttk.Combobox(
             self.aes_mode_dropdown_frame,
@@ -130,5 +132,52 @@ class DecryptFrame(tk.Frame):
             self.nonce_label.config(text=f"Nonce/IV: {self.nonce_iv_file}")
 
     def decrypt(self):
-        #decryption logic will go here
-        pass
+
+        ##DEBUG
+        print("INPUT:", self.input_file)
+        print("OUTPUT:", self.output_file)
+        print("KEY:", self.aes_key_file)
+        print("NONCE:", self.nonce_iv_file)
+        print("RSA:", self.rsa_key_file_private)
+
+
+        if not self.input_file:
+            messagebox.showerror("Błąd", "Brak pliku wejściowego")
+            return
+
+        if not self.output_file:
+            messagebox.showerror("Błąd", "Brak pliku wyjściowego")
+            return
+
+        if not self.aes_key_file:
+            messagebox.showerror("Błąd", "Brak klucza AES")
+            return
+
+        rsa_enabled = self.aes_key_var.get()
+
+        if rsa_enabled and not self.rsa_key_file_private:
+            messagebox.showerror("Błąd", "Brak klucza prywatnego RSA")
+            return
+
+        try:
+            self.busy_status_label.config(text="Odszyfrowywanie...")
+
+            algorithm = self.selected_aes_mode.get()
+
+            decrypt_dispatcher(
+                algorithm=algorithm,
+                input_file=self.input_file,
+                output_file=self.output_file,
+                aes_key_file=self.aes_key_file,
+                rsa_enabled=rsa_enabled,
+                rsa_private_key_file=self.rsa_key_file_private,
+                nonce_file=self.nonce_iv_file
+            )
+
+            self.busy_status_label.config(text="Gotowe")
+
+            messagebox.showinfo("OK", "Plik odszyfrowany")
+
+        except Exception as e:
+            self.busy_status_label.config(text="Błąd")
+            messagebox.showerror("Błąd odszyfrowania", str(e))

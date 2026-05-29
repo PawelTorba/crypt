@@ -9,7 +9,7 @@ import tkinter as tk
 
 root = tk.Tk()
 root.title("Encryption / Decryption Tool")
-root.geometry("1440x900")
+root.geometry("800x600")
 
 # CENTER CONTAINER FRAME
 main_frame = tk.Frame(root)

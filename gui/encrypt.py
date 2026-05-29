@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import messagebox
+from algorithms.crypto_lib import encrypt_dispatcher
 
 class EncryptFrame(tk.Frame):
     def __init__(self, parent):
@@ -41,7 +43,7 @@ class EncryptFrame(tk.Frame):
         self.aes_modes_frame.grid(row=0, column=0, columnspan=3, sticky="w")
         self.label_aes_options = tk.Label(self.aes_modes_frame, text="Tryb AES:")
         self.label_aes_options.grid(row=0, column=0, padx=10, pady=10, sticky="w")  
-        self.aes_modes = ["AES-256-CBC", "AES-256-CFB", "AES-256-OFB", "AES-256-CTR"]
+        self.aes_modes = ["AES-256-GCM"]
         self.selected_aes_mode = tk.StringVar(value=self.aes_modes[0])
         self.aes_mode_dropdown = ttk.Combobox(
             self.aes_modes_frame,
@@ -75,7 +77,15 @@ class EncryptFrame(tk.Frame):
         ## RSA OPTIONS FRAME -< encryption frame
         self.RSA_options_frame = tk.Frame(self)
         self.RSA_options_frame.grid(row=4, column=0, columnspan=3 , sticky="w")
-        self.check_rsa_encrypt = tk.Checkbutton(self.RSA_options_frame, text="Szyfruj klucz AES kluczem RSA odbiorcy")
+
+        self.rsa_encrypt_var = tk.BooleanVar(value=False)
+
+        self.check_rsa_encrypt = tk.Checkbutton(
+            self.RSA_options_frame,
+            text="Szyfruj klucz AES kluczem RSA odbiorcy",
+            variable=self.rsa_encrypt_var
+            )
+
         self.check_rsa_encrypt.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         self.rsa_public_key_label = tk.Label(self.RSA_options_frame, text="Klucz publiczny RSA odbiorcy:")
         self.rsa_public_key_label.grid(row=1, column=0, padx=10,pady=10, sticky="w")
@@ -113,5 +123,62 @@ class EncryptFrame(tk.Frame):
             self.rsa_public_key_label.config(text=f"Klucz publiczny RSA odbiorcy: {self.rsa_key_file_public}")
 
     def encrypt(self):
-        #encryption logic will go here
-        pass
+
+        if not self.input_file:
+            messagebox.showerror(
+                "Błąd",
+                "Nie wybrano pliku wejściowego"
+            )
+            return
+
+        if not self.output_file:
+            messagebox.showerror(
+                "Błąd",
+                "Nie wybrano pliku wyjściowego"
+            )
+            return
+
+        rsa_enabled = self.rsa_encrypt_var.get()
+
+        if rsa_enabled and not self.rsa_key_file_public:
+            messagebox.showerror(
+                "Błąd",
+                "Nie wybrano klucza publicznego RSA"
+            )
+            return
+
+        try:
+
+            self.busy_status_label.config(
+                text="Szyfrowanie..."
+            )
+
+            selected_algorithm = self.selected_aes_mode.get()
+
+            encrypt_dispatcher(
+                algorithm=selected_algorithm,
+                input_file=self.input_file,
+                output_file=self.output_file,
+                rsa_enabled=rsa_enabled,
+                rsa_public_key_file=self.rsa_key_file_public
+            )
+
+            self.busy_status_label.config(
+                text="Szyfrowanie zakończone"
+            )
+
+            messagebox.showinfo(
+                "Sukces",
+                "Plik został zaszyfrowany"
+            )
+
+        except Exception as e:
+
+            self.busy_status_label.config(
+                text="Błąd"
+            )
+
+            messagebox.showerror(
+                "Błąd szyfrowania",
+                str(e)
+            )
